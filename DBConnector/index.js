@@ -1,6 +1,6 @@
 const mongo = require('mongoose');
 module.exports = async function() {
-    const connection = await mongo.connect('mongodb+srv://root:Pangolins4eva@cluster0.nyyqa.mongodb.net/test', {
+    const connection = await mongo.connect('mongodb+srv://root:Pangolins4eva@cluster0.nyyqa.mongodb.net/til', {
         useNewUrlParser: true,
         useUnifiedTopology: true
     });
@@ -11,3 +11,4 @@ mongo.connection.once('open', () => {
     console.log('connected to database');
 })
 
+export default

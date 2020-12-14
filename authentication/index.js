@@ -3,7 +3,10 @@ const jwt = require('jsonwebtoken');
 let payload = {username: 'boop', hash: '45n23j4'}
 
 function generateAccessToken() {
-    return jwt.sign(payload, 'secret', { expiresIn: '1800s' });
+    return jwt.sign(payload,
+        'secret',
+        { expiresIn: '1800s'}
+    );
 }
 
 function authenticateToken(req, res, next) {

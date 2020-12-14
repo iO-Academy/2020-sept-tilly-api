@@ -39,6 +39,6 @@ app.use(
     })),
 );
 
-app.listen(4002, () => {
+app.listen(port, () => {
     console.log('Server running successfully...')
 })
