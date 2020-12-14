@@ -84,6 +84,12 @@ const LessonType = new GraphQLObjectType({
 const RootQuery = new GraphQLObjectType({
     name: 'RootQuery',
     fields: {
+        hostname: {
+            type: GraphQLString,
+            resolve(parent, args) {
+                return parent.hostname;
+            }
+        },
         user: {
             type: UserType,
             args: {
