@@ -8,10 +8,6 @@ const { graphqlHTTP } = require('express-graphql');
 const graphQLSchema = require('./schema');
 const { buildSchema } = require('graphql');
 const jwt = require('jsonwebtoken');
-const unless = require('express-unless');
-const expressjwt = require('express-jwt');
-
-const jwtCheck = expressjwt({secret:'secret', algorithms:['HS256']})
 
 
 app.use(cors({origin: '*'}));
@@ -26,29 +22,30 @@ mongo.connection.once('open', () => {
     console.log('connected to database');
 })
 
-// const verifyToken = (req, res, next) => {
-//     jwt.verify(req.headers.authorization,
-//         'secret',
-//         (err, decoded) => {
-//             if (err){
-//                 return res.sendStatus(401);
-//             }
-//             next();
-//         });
-// }
-// verifyToken.unless = unless;
-// jwtCheck.unless = unless;
+let payload = {username: 'boop', hash: '45n23j4'}
 
-app.post('/auth', (req, res) => {
-    const token = jwt.sign({ username: 'boop' }, 'secret');
-    res.send(token);
+function generateAccessToken() {
+    return jwt.sign(payload, 'secret', { expiresIn: '1800s' });
+}
+
+function authenticateToken(req, res, next) {
+    const authHeader = req.headers['authorization']
+    const token = authHeader && authHeader.split(' ')[1]
+    if (token == null) return res.sendStatus(401)
+    jwt.verify(token, 'secret', (err, user) => {
+        console.log(err)
+        if (err) return res.sendStatus(403)
+        req.user = user
+        next()
+    })
+}
+
+app.get('/auth', (req, res) => {
+    const token = generateAccessToken()
+    res.json(token)
 })
 
-// app.use(verifyToken.unless({ path: ['/auth'] }));
-// app.use(expressjwt({ secret: 'secret'}).unless({path: ['/auth', '/']}));
-app.get('/private', jwtCheck({secret: 'secret'}), (req, res) => {
-    res.send('texthere');
-})
+app.use(authenticateToken);
 
 app.use(
     '/graphql',
@@ -57,9 +54,6 @@ app.use(
         graphiql: true,
     })),
 );
-
-
-
 
 app.listen(4002, () => {
     console.log('Server running successfully...')
