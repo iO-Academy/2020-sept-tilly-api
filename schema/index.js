@@ -2,6 +2,7 @@ const graphql = require('graphql');
 
 const User = require('../mongo-models/User');
 const Lesson = require('../mongo-models/Lesson');
+const authenticate = require('../authentication');
 
 const {
     GraphQLObjectType,
@@ -126,7 +127,7 @@ const Mutation = new GraphQLObjectType({
                     type: new GraphQLNonNull(GraphQLString)
                 },
                 lessons: {
-                    type: new GraphQLList(new GraphQLNonNull(GraphQLString))
+                    type: new GraphQLList(GraphQLString)
                 },
                 name: {
                     type: new GraphQLNonNull(GraphQLString)
@@ -144,7 +145,10 @@ const Mutation = new GraphQLObjectType({
                     name: args.name,
                     username: args.username
                 });
-                return user.save();
+                return user.save(()=> {
+                    console.log(authenticate.generateToken());
+                });
+
             }
         }
     }
