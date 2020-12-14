@@ -26,7 +26,7 @@ mongo.connection.once('open', () => {
 
 app.get('/auth', (req, res) => {
     const token = authenticate.generateToken()
-    res.json(token)
+    res.send(token)
 })
 
 // app.use(authenticate.authenticateToken);

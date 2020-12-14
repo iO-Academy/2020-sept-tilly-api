@@ -36,9 +36,6 @@ const UserType = new GraphQLObjectType({
         hash: {
             type: GraphQLString
         },
-        token: {
-            type: GraphQLString
-        },
         description: {
             type: GraphQLString
         },
@@ -131,7 +128,7 @@ const Mutation = new GraphQLObjectType({
     name: 'Mutation',
     fields: {
         login: {
-            type: UserType,
+            type: GraphQLString,
             args: {
                 username: {
                     type: GraphQLString
@@ -140,14 +137,13 @@ const Mutation = new GraphQLObjectType({
                     type: GraphQLString
                 }
             },
-            resolve(parent, args) {
-                const user = User.findOne({username: args.username})
-                user.token = authenticate.generateToken();
-                return user;
+            async resolve(parent, args) {
+                User.findOne({username: args.username})
+                return authenticate.generateToken({username: args.username, password: args.password});
             }
         },
         addUser: {
-            type: UserType,
+            type: GraphQLString,
             args: {
                 name: {
                     type: GraphQLString
@@ -165,17 +161,16 @@ const Mutation = new GraphQLObjectType({
                     type: GraphQLString
                 }
             },
-            resolve(parent, args) {
+            async resolve(parent, args) {
                 let user = new User({
                     name: args.name,
                     username: args.username,
                     email: args.email,
-                    hash: bcrypt.hash(args.password, 10),
-                    description: args.description
+                    hash: await bcrypt.hash(args.password, 10),
+                    description: args.description,
                 });
-                user.save
-                const token = authenticate.generateToken();
-                return user;
+                user.save();
+                return authenticate.generateToken({id: user.id})
             }
         }
     }
