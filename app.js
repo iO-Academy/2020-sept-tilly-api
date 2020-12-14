@@ -29,7 +29,7 @@ app.get('/auth', (req, res) => {
     res.json(token)
 })
 
-app.use(authenticate.authenticateToken);
+// app.use(authenticate.authenticateToken);
 
 app.use(
     '/graphql',

@@ -1,8 +1,10 @@
 const graphql = require('graphql');
-
 const User = require('../mongo-models/User');
 const Lesson = require('../mongo-models/Lesson');
 const authenticate = require('../authentication');
+const bcrypt = require('bcrypt');
+const express = require('express');
+const app = express();
 
 const {
     GraphQLObjectType,
@@ -32,6 +34,9 @@ const UserType = new GraphQLObjectType({
             type: GraphQLString
         },
         hash: {
+            type: GraphQLString
+        },
+        token: {
             type: GraphQLString
         },
         description: {
@@ -85,12 +90,6 @@ const LessonType = new GraphQLObjectType({
 const RootQuery = new GraphQLObjectType({
     name: 'RootQuery',
     fields: {
-        hostname: {
-            type: GraphQLString,
-            resolve(parent, args) {
-                return parent.hostname;
-            }
-        },
         user: {
             type: UserType,
             args: {
@@ -99,13 +98,30 @@ const RootQuery = new GraphQLObjectType({
                 }
             },
             resolve(parent, args) {
-                return User.findById(args._id);
+                return User.findById(args.id);
             }
         },
         users: {
             type: new GraphQLList(UserType),
             resolve(parent, args) {
                 return User.find({});
+            }
+        },
+        lesson: {
+            type: UserType,
+            args: {
+                id: {
+                    type: GraphQLID
+                }
+            },
+            resolve(parent, args) {
+                return Lesson.findById(args.id);
+            }
+        },
+        lessons: {
+            type: new GraphQLList(LessonType),
+            resolve(parent, args) {
+                return Lesson.find({});
             }
         }
     }
@@ -114,41 +130,52 @@ const RootQuery = new GraphQLObjectType({
 const Mutation = new GraphQLObjectType({
     name: 'Mutation',
     fields: {
+        login: {
+            type: UserType,
+            args: {
+                username: {
+                    type: GraphQLString
+                },
+                password: {
+                    type: GraphQLString
+                }
+            },
+            resolve(parent, args) {
+                const user = User.findOne({username: args.username})
+                user.token = authenticate.generateToken();
+                return user;
+            }
+        },
         addUser: {
             type: UserType,
             args: {
-                description: {
-                    type: new GraphQLNonNull(GraphQLString)
-                },
-                email: {
-                    type: new GraphQLNonNull(GraphQLString)
-                },
-                hash: {
-                    type: new GraphQLNonNull(GraphQLString)
-                },
-                lessons: {
-                    type: new GraphQLList(GraphQLString)
-                },
                 name: {
-                    type: new GraphQLNonNull(GraphQLString)
+                    type: GraphQLString
                 },
                 username: {
-                    type: new GraphQLNonNull(GraphQLString)
+                    type: GraphQLString
+                },
+                email: {
+                    type: GraphQLString
+                },
+                password: {
+                    type: GraphQLString
+                },
+                description: {
+                    type: GraphQLString
                 }
             },
             resolve(parent, args) {
                 let user = new User({
-                    description: args.description,
-                    email: args.email,
-                    hash: args.hash,
-                    lessons: args.lessons,
                     name: args.name,
-                    username: args.username
+                    username: args.username,
+                    email: args.email,
+                    hash: bcrypt.hash(args.password, 10),
+                    description: args.description
                 });
-                return user.save(()=> {
-                    console.log(authenticate.generateToken());
-                });
-
+                user.save
+                const token = authenticate.generateToken();
+                return user;
             }
         }
     }
