@@ -114,10 +114,7 @@ const RootQuery = new GraphQLObjectType({
                 }
             },
             async resolve(parent, args) {
-                if (await User.findOne({username: args.username}) !== null ){
-                    return false;
-                }
-                return true;
+                return await User.findOne({username: args.username}) === null;
             }
         },
         availableEmail: {
@@ -208,10 +205,34 @@ const Mutation = new GraphQLObjectType({
                     username: args.username,
                     email: args.email,
                     hash: await bcrypt.hash(args.password, 10),
-                    description: args.description,
+                    description: args.description
                 });
                 user.save();
                 return authenticate.generateToken({id: user.id})
+            }
+        },
+        addTil: {
+            type: LessonType,
+            args: {
+                lesson: {
+                    type: GraphQLString
+                },
+                userId: {
+                    type: GraphQLID
+                },
+                token: {
+                    type: GraphQLString
+                }
+            },
+            async resolve(parent, args) {
+                let lesson = new Lesson({
+                    lesson: args.lesson,
+                    userId: args.userId
+                });
+                let user = await User.findById(args.userId)
+                user.lessons.push(lesson._id)
+                await User.updateOne({_id : args.userId}, {$set : {lessons : user.lessons}})
+                return lesson.save();
             }
         }
     }
