@@ -95,6 +95,28 @@ const RootQuery = new GraphQLObjectType({
                 return User.findById(args.id);
             }
         },
+        username: {
+            type: UserType,
+            args: {
+                username: {
+                    type: GraphQLString
+                }
+            },
+            resolve(parent, args) {
+                return User.findOne({username: args.username})
+            }
+        },
+        email: {
+            type: UserType,
+            args: {
+                email: {
+                    type: GraphQLString
+                }
+            },
+            resolve(parent, args) {
+                return User.findOne({email: args.email})
+            }
+        },
         users: {
             type: new GraphQLList(UserType),
             resolve(parent, args) {
