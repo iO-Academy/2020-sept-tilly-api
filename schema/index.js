@@ -3,8 +3,6 @@ const User = require('../mongo-models/User');
 const Lesson = require('../mongo-models/Lesson');
 const authenticate = require('../authentication');
 const bcrypt = require('bcrypt');
-const express = require('express');
-const app = express();
 
 const {
     GraphQLObjectType,
@@ -16,7 +14,6 @@ const {
     GraphQLList,
     GraphQLNonNull
 } = graphql;
-
 
 const UserType = new GraphQLObjectType({
     name: 'User',
@@ -138,8 +135,13 @@ const Mutation = new GraphQLObjectType({
                 }
             },
             async resolve(parent, args) {
-                User.findOne({username: args.username})
-                return authenticate.generateToken({username: args.username, password: args.password});
+                let user = await User.findOne({username: args.username})
+                let result = await bcrypt.compare(args.password, user.hash)
+                if (result) {
+                    return authenticate.generateToken({username: args.username, password: args.password});
+                } else {
+                    return 'Login failed'
+                }
             }
         },
         addUser: {
