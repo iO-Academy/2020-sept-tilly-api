@@ -2,8 +2,8 @@ const jwt = require('jsonwebtoken');
 
 function generateAccessToken(payload) {
     return jwt.sign(payload,
-        'secret',
-        { expiresIn: '1800s'}
+        'secret'
+        // { expiresIn: '1800s'}
     );
 }
 

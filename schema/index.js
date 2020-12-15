@@ -264,6 +264,51 @@ const Mutation = new GraphQLObjectType({
                 }
                 return false;
             }
+        },
+        unfollow: {
+            type: GraphQLBoolean,
+            args: {
+                follower: {
+                    type: GraphQLID
+                },
+                followee: {
+                    type: GraphQLID
+                },
+                token: {
+                    type: GraphQLString
+                }
+            },
+            async resolve(parent, args) {
+                let tokenResponse = await authenticate.authenticateToken(args.token)
+                if (tokenResponse && tokenResponse.id === args.follower) {
+                    let follower = await User.findById(args.follower)
+                    let followee = await User.findById(args.followee)
+                    console.log(follower.following)
+                    console.log(followee._id)
+                    console.log(follower.following.findIndex(
+                        val => {
+                            val == followee._id
+                        }))
+                    // follower.following.splice(
+                    //     follower.following.findIndex(
+                    //         val => {
+                    //             val === followee._id
+                    //         })
+                    //     ,1
+                    // )
+                    // followee.followers.splice(
+                    //     followee.followers.findIndex(
+                    //         val => {
+                    //             val === follower._id
+                    //         })
+                    //     ,1
+                    // )
+                    // await User.updateOne({_id: args.follower}, {$set: {following: follower.following}})
+                    // await User.updateOne({_id: args.followee}, {$set: {followers: followee.followers}})
+                    // return true;
+                }
+                return false;
+            }
         }
     }
 })
