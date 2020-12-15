@@ -106,6 +106,20 @@ const RootQuery = new GraphQLObjectType({
                 return User.findOne({username: args.username})
             }
         },
+        availableUsername: {
+            type: GraphQLBoolean,
+            args: {
+                username: {
+                    type: GraphQLString
+                }
+            },
+            async resolve(parent, args) {
+                if (await User.findOne({username: args.username}) !== null ){
+                    return false;
+                }
+                return true;
+            }
+        },
         email: {
             type: UserType,
             args: {
