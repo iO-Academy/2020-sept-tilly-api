@@ -229,10 +229,13 @@ const Mutation = new GraphQLObjectType({
                     lesson: args.lesson,
                     userId: args.userId
                 });
-                let user = await User.findById(args.userId)
-                user.lessons.push(lesson._id)
-                await User.updateOne({_id : args.userId}, {$set : {lessons : user.lessons}})
-                return lesson.save();
+                let tokenResponse = await authenticate.authenticateToken(args.token)
+                if (tokenResponse && tokenResponse.id === args.userId) {
+                    let user = await User.findById(args.userId)
+                    user.lessons.push(lesson._id)
+                    await User.updateOne({_id: args.userId}, {$set: {lessons: user.lessons}})
+                    return lesson.save();
+                }
             }
         }
     }
