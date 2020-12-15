@@ -36,27 +36,27 @@ const UserType = new GraphQLObjectType({
         description: {
             type: GraphQLString
         },
-        followingList: {
+        following: {
             type: new GraphQLList(UserType),
             resolve(parent, args) {
                 return User.find({
-                    id: {$in : parent.following}
+                    _id: {$in : parent.following}
                 })
             }
         },
-        followersList: {
+        followers: {
             type: new GraphQLList(UserType),
             resolve(parent, args) {
                 return User.find({
-                    id: {$in : parent.followers}
+                    _id: {$in : parent.followers}
                 })
             }
         },
-        lessonsList: {
+        lessons: {
             type: new GraphQLList(LessonType),
             resolve(parent, args) {
                 return Lesson.find({
-                    id: {$in : parent.lessons}
+                    _id : {$in : parent.lessons}
                 })
             }
         }
@@ -124,7 +124,7 @@ const RootQuery = new GraphQLObjectType({
             }
         },
         lesson: {
-            type: UserType,
+            type: LessonType,
             args: {
                 id: {
                     type: GraphQLID
