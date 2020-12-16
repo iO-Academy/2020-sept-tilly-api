@@ -22,13 +22,10 @@ mongo.connection.once('open', () => {
     console.log(`connected to database on http://localhost:${port}`);
 })
 
-
 app.get('/auth', (req, res) => {
     const token = authenticate.generateToken()
     res.send(token)
 })
-
-// app.use(authenticate.authenticateToken);
 
 app.use(
     '/graphql',
