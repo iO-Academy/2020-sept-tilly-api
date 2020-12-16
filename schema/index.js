@@ -22,7 +22,8 @@ const UserType = new GraphQLObjectType({
             type: GraphQLID
         },
         username: {
-            type: GraphQLString
+            type: GraphQLString,
+            text: true
         },
         name: {
             type: GraphQLString
@@ -114,7 +115,7 @@ const RootQuery = new GraphQLObjectType({
                 }
             },
             resolve(parent, args) {
-                return User.find({$text : {$search: args.searchTerm}})
+                return User.find({username : new RegExp(args.searchTerm)})
             }
         },
         availableUsername: {

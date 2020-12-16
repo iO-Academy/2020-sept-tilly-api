@@ -10,7 +10,6 @@ const { buildSchema } = require('graphql');
 const port = 4002;
 const authenticate = require('./authentication');
 
-
 app.use(cors({origin: '*'}));
 app.options('*', cors({origin: '*'}));
 
