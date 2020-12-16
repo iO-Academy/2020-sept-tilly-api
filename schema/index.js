@@ -114,8 +114,10 @@ const RootQuery = new GraphQLObjectType({
                     type: GraphQLString
                 }
             },
-            resolve(parent, args) {
-                return User.find({username : new RegExp(args.searchTerm)})
+            async resolve(parent, args) {
+                let usernameResults = await User.find({username : new RegExp(args.searchTerm, 'i')}),
+                    descriptionResults = await User.find({description : new RegExp(args.searchTerm, 'i')})
+                return descriptionResults.concat(usernameResults)
             }
         },
         availableUsername: {
