@@ -125,10 +125,8 @@ const RootQuery = new GraphQLObjectType({
                 }
             },
             async resolve(parent, args) {
-                if (await User.findOne({email: args.email}) !== null ){
-                    return false;
-                }
-                return true;
+                return await User.findOne({email: args.email}) === null;
+
             }
         },
         users: {
@@ -174,9 +172,30 @@ const Mutation = new GraphQLObjectType({
                 let user = await User.findOne({username: args.username})
                 let result = await bcrypt.compare(args.password, user.hash)
                 if (result) {
-                    return authenticate.generateToken({id: user.id});
+                    return authenticate.generateAccessToken({id: user.id}) + ' '
+                + authenticate.generateRefreshToken({id: user.id})
                 } else {
                     return 'Login failed'
+                }
+            }
+        },
+        renew: {
+            type: GraphQLString,
+            args: {
+                userId: {
+                type: GraphQLID
+                },
+                refreshToken: {
+                    type: GraphQLString
+                }
+            },
+            async resolve(parent, args) {
+                let tokenResponse = await authenticate.authenticateToken(args.refreshToken)
+                if (tokenResponse && tokenResponse.id === args.userId) {
+                    return authenticate.generateAccessToken({id: args.userId}) + ' '
+                        + authenticate.generateRefreshToken({id: args.userId})
+                } else {
+                    return 'Token refresh failed'
                 }
             }
         },
@@ -208,7 +227,10 @@ const Mutation = new GraphQLObjectType({
                     description: args.description
                 });
                 user.save();
-                return authenticate.generateToken({id: user.id})
+                return [
+                    authenticate.generateAccessToken({id: user.id}),
+                    authenticate.generateRefreshToken({id: user.id})
+                ]
             }
         },
         addTil: {

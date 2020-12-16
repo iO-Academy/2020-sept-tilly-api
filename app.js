@@ -10,7 +10,6 @@ const { buildSchema } = require('graphql');
 const port = 4002;
 const authenticate = require('./authentication');
 
-
 app.use(cors({origin: '*'}));
 app.options('*', cors({origin: '*'}));
 
@@ -24,10 +23,10 @@ mongo.connection.once('open', () => {
 })
 
 
-app.get('/auth', (req, res) => {
-    const token = authenticate.generateToken()
-    res.send(token)
-})
+// app.get('/auth', (req, res) => {
+//     const token = authenticate.generateToken()
+//     res.send(token)
+// })
 
 // app.use(authenticate.authenticateToken);
 
