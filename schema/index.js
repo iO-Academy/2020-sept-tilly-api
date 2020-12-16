@@ -106,6 +106,17 @@ const RootQuery = new GraphQLObjectType({
                 return User.findOne({username: args.username})
             }
         },
+        search: {
+            type: new GraphQLList(UserType),
+            args: {
+                searchTerm: {
+                    type: GraphQLString
+                }
+            },
+            resolve(parent, args) {
+                return User.find({$text : {$search: args.searchTerm}})
+            }
+        },
         availableUsername: {
             type: GraphQLBoolean,
             args: {
