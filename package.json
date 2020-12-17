@@ -1,0 +1,37 @@
+{
+  "name": "2020-sept-tilly-api",
+  "version": "1.0.0",
+  "description": "TIL Social Site",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Mayden-Academy/2020-sept-tilly-api.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Mayden-Academy/2020-sept-tilly-api/issues"
+  },
+  "homepage": "https://github.com/Mayden-Academy/2020-sept-tilly-api#readme",
+  "dependencies": {
+    "bcrypt": "^5.0.0",
+    "body-parser": "^1.19.0",
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "express-graphql": "^0.12.0",
+    "express-jwt": "^6.0.0",
+    "express-unless": "^0.5.0",
+    "graphql": "^15.4.0",
+    "jsonwebtoken": "^8.5.1",
+    "merge-graphql-schemas": "^1.7.8",
+    "mongoose": "^5.11.7",
+    "package-lock.json": "^1.0.0"
+  },
+  "devDependencies": {
+    "graphql-tools": "^7.0.2",
+    "mongodb": "^3.6.3"
+  }
+}
