@@ -12,6 +12,4 @@ const userSchema = new Schema({
     lessons: Array
 });
 
-// userSchema.index({username : "text"})
-
 module.exports = mongo.model('User', userSchema);
