@@ -186,7 +186,7 @@ const Mutation = new GraphQLObjectType({
                 let user = await User.findOne({username: args.username})
                 let result = await bcrypt.compare(args.password, user.hash)
                 if (result) {
-                    return authenticate.generateToken({id: user.id});
+                    return authenticate.generateToken({id: user.id, username: args.username});
                 } else {
                     return 'Login failed'
                 }
@@ -220,7 +220,7 @@ const Mutation = new GraphQLObjectType({
                     description: args.description
                 });
                 user.save();
-                return authenticate.generateToken({id: user.id})
+                return authenticate.generateToken({id: user.id, username: args.username})
             }
         },
         addTil: {
