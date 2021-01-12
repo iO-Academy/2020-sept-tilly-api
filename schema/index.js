@@ -297,15 +297,17 @@ const Mutation = new GraphQLObjectType({
                 if (tokenResponse && tokenResponse.id === args.follower) {
                     let follower = await User.findById(args.follower)
                     let followee = await User.findById(args.followee)
-                    follower.following.splice(
-                        follower.following.indexOf(followee._id), 1
-                    )
-                    followee.followers.splice(
-                        followee.followers.indexOf(follower._id), 1
-                    )
-                    await User.updateOne({_id: args.follower}, {$set: {following: follower.following}})
-                    await User.updateOne({_id: args.followee}, {$set: {followers: followee.followers}})
-                    return true;
+                    if (follower.following.indexOf(args.followee) !== -1) {
+                        follower.following.splice(
+                            follower.following.indexOf(followee._id), 1
+                        )
+                        followee.followers.splice(
+                            followee.followers.indexOf(follower._id), 1
+                        )
+                        await User.updateOne({_id: args.follower}, {$set: {following: follower.following}})
+                        await User.updateOne({_id: args.followee}, {$set: {followers: followee.followers}})
+                        return true;
+                    }
                 }
                 return false;
             }
