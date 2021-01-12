@@ -115,7 +115,12 @@ const RootQuery = new GraphQLObjectType({
                 }
             },
             resolve(parent, args) {
-                return User.find({username : new RegExp(args.searchTerm)})
+                return User.find({$or: [
+                        {username : new RegExp(args.searchTerm)},
+                        {name : new RegExp(args.searchTerm)},
+                        {email : new RegExp(args.searchTerm)},
+                        {description : new RegExp(args.searchTerm)}
+                    ]})
             }
         },
         availableUsername: {
