@@ -10,7 +10,8 @@ const userSchema = new Schema({
     following: Array,
     followers: Array,
     lessons: Array,
-    likedLessons: Array
+    likedLessons: Array,
+    notifications: Array
 });
 
 module.exports = mongo.model('User', userSchema);

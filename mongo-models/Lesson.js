@@ -3,7 +3,7 @@ const Schema = mongo.Schema;
 
 const lessonSchema = new Schema({
     lesson: String,
-    userId: String,
+    userId: Object,
     likedBy: Array
 });
 

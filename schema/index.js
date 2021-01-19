@@ -1,6 +1,7 @@
 const graphql = require('graphql');
 const User = require('../mongo-models/User');
 const Lesson = require('../mongo-models/Lesson');
+const Notification = require('../mongo-models/Notification');
 const authenticate = require('../authentication');
 const bcrypt = require('bcrypt');
 
@@ -68,6 +69,14 @@ const UserType = new GraphQLObjectType({
                     _id : {$in : parent.likedLessons}
                 })
             }
+        },
+        notifications: {
+            type: new GraphQLList(NotificationType),
+            resolve(parent, args) {
+                return Notification.find({
+                    _id : {$in : parent.notifications}
+                })
+            }
         }
     })
 });
@@ -94,6 +103,39 @@ const LessonType = new GraphQLObjectType({
                     _id: {$in: parent.likedBy}
                 })
             }
+        }
+    })
+});
+
+const NotificationType = new GraphQLObjectType({
+    name: 'Notification',
+    fields: () => ({
+        id: {
+            type: GraphQLID
+        },
+        sender: {
+            type: UserType,
+            resolve(parent, args) {
+                return User.findById(parent.sender)
+            }
+        },
+        recipient: {
+            type: UserType,
+            resolve(parent, args) {
+                return User.findById(parent.recipient)
+            }
+        },
+        type: {
+            type: GraphQLString
+        },
+        lesson: {
+            type: LessonType,
+            resolve(parent, args) {
+                return Lesson.findById(parent.lesson)
+            }
+        },
+        status: {
+            type: GraphQLString
         }
     })
 });
@@ -261,7 +303,7 @@ const Mutation = new GraphQLObjectType({
                 let user = await User.findById(args.userId)
                 let lesson = new Lesson({
                     lesson: args.lesson,
-                    userId: user
+                    userId: user._id
                 });
                 let tokenResponse = await authenticate.authenticateToken(args.token)
                 if (tokenResponse && tokenResponse.id === args.userId) {
@@ -403,7 +445,44 @@ const Mutation = new GraphQLObjectType({
                     await User.updateMany({}, {$pull: {likedLessons: lesson._id}})
                 }
             }
-        }
+        },
+        addNotification: {
+            type: GraphQLBoolean,
+            args: {
+                sender: {
+                    type: GraphQLID
+                },
+                recipient: {
+                    type: GraphQLID
+                },
+                type: {
+                    type: GraphQLString
+                },
+                lesson: {
+                    type: GraphQLID
+                },
+                token: {
+                    type: GraphQLString
+                }
+            },
+            async resolve(parent, args) {
+                let sender = await User.findById(args.sender)
+                let recipient = await User.findById(args.recipient)
+                let lesson = await Lesson.findById(args.lesson)
+                let notification = new Notification({
+                    senderId: sender._id,
+                    recipientId: recipient._id,
+                    type: args.type,
+                    lessonId: lesson._id,
+                    status: "unread"
+                });
+                let tokenResponse = await authenticate.authenticateToken(args.token)
+                if (tokenResponse && tokenResponse.id === args.sender) {
+                    await User.updateOne({_id: args.recipient}, {$push: {notifications: notification._id}})
+                    await notification.save();
+                }
+            }
+        },
     }
 })
 
