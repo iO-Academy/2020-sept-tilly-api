@@ -258,13 +258,13 @@ const Mutation = new GraphQLObjectType({
                 }
             },
             async resolve(parent, args) {
+                let user = await User.findById(args.userId)
                 let lesson = new Lesson({
                     lesson: args.lesson,
-                    userId: args.userId
+                    userId: user
                 });
                 let tokenResponse = await authenticate.authenticateToken(args.token)
                 if (tokenResponse && tokenResponse.id === args.userId) {
-                    let user = await User.findById(args.userId)
                     user.lessons.push(lesson._id)
                     await User.updateOne({_id: args.userId}, {$set: {lessons: user.lessons}})
                     return lesson.save();
@@ -352,9 +352,9 @@ const Mutation = new GraphQLObjectType({
                     let lesson = await Lesson.findById(args.lesson)
                     let user = await User.findById(args.user)
                     lesson.likedBy.indexOf(args.user) === -1 &&
-                    await Lesson.updateOne({_id: args.lesson}, {$push: {likedBy: args.user}})
+                    await Lesson.updateOne({_id: args.lesson}, {$push: {likedBy: user._id}})
                     user.likedLessons.indexOf(args.lesson) === -1 &&
-                    await User.updateOne({_id: args.user}, {$push: {likedLessons: args.lesson}})
+                    await User.updateOne({_id: args.user}, {$push: {likedLessons: lesson._id}})
                 }
             }
         },
@@ -374,8 +374,33 @@ const Mutation = new GraphQLObjectType({
             async resolve(parent, args) {
                 let tokenResponse = await authenticate.authenticateToken(args.token)
                 if (tokenResponse && tokenResponse.id === args.user) {
-                    await Lesson.updateOne({_id: args.lesson}, {$pull: {likedBy: {$in: args.user}}})
-                    await User.updateOne({_id: args.user}, {$pull: {likedLessons: {$in: args.lesson}}})
+                    let lesson = await Lesson.findById(args.lesson)
+                    let user = await User.findById(args.user)
+                    await Lesson.updateOne({_id: args.lesson}, {$pull: {likedBy: user._id}})
+                    await User.updateOne({_id: args.user}, {$pull: {likedLessons: lesson._id}})
+                }
+            }
+        },
+        deleteLesson: {
+            type: GraphQLBoolean,
+            args: {
+                user: {
+                    type: GraphQLID
+                },
+                lesson: {
+                    type: GraphQLID
+                },
+                token: {
+                    type: GraphQLString
+                }
+            },
+            async resolve(parent, args) {
+                let tokenResponse = await authenticate.authenticateToken(args.token)
+                if (tokenResponse && tokenResponse.id === args.user) {
+                    let lesson = await Lesson.findById(args.lesson)
+                    await Lesson.deleteOne({_id: args.lesson})
+                    await User.updateOne({_id: args.user}, {$pull: {lessons: lesson._id}})
+                    await User.updateMany({}, {$pull: {likedLessons: lesson._id}})
                 }
             }
         }
