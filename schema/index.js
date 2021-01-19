@@ -60,6 +60,14 @@ const UserType = new GraphQLObjectType({
                     _id : {$in : parent.lessons}
                 })
             }
+        },
+        likedLessons: {
+            type: new GraphQLList(LessonType),
+            resolve(parent, args) {
+                return Lesson.find({
+                    _id : {$in : parent.likedLessons}
+                })
+            }
         }
     })
 });
@@ -77,6 +85,14 @@ const LessonType = new GraphQLObjectType({
             type: UserType,
             resolve(parent, args) {
                 return User.findById(parent.userId)
+            }
+        },
+        likedBy: {
+            type: GraphQLList(UserType),
+            resolve(parent, args) {
+                return User.find({
+                    _id: {$in: parent.likedBy}
+                })
             }
         }
     })
@@ -315,6 +331,52 @@ const Mutation = new GraphQLObjectType({
                     }
                 }
                 return false;
+            }
+        },
+        like: {
+            type: GraphQLBoolean,
+            args: {
+                user: {
+                    type: GraphQLID
+                },
+                lesson: {
+                    type: GraphQLID
+                },
+                token: {
+                    type: GraphQLString
+                }
+            },
+            async resolve(parent, args) {
+                let tokenResponse = await authenticate.authenticateToken(args.token)
+                if (tokenResponse && tokenResponse.id === args.user) {
+                    let lesson = await Lesson.findById(args.lesson)
+                    let user = await User.findById(args.user)
+                    lesson.likedBy.indexOf(args.user) === -1 &&
+                    await Lesson.updateOne({_id: args.lesson}, {$push: {likedBy: args.user}})
+                    user.likedLessons.indexOf(args.lesson) === -1 &&
+                    await User.updateOne({_id: args.user}, {$push: {likedLessons: args.lesson}})
+                }
+            }
+        },
+        unlike: {
+            type: GraphQLBoolean,
+            args: {
+                user: {
+                    type: GraphQLID
+                },
+                lesson: {
+                    type: GraphQLID
+                },
+                token: {
+                    type: GraphQLString
+                }
+            },
+            async resolve(parent, args) {
+                let tokenResponse = await authenticate.authenticateToken(args.token)
+                if (tokenResponse && tokenResponse.id === args.user) {
+                    await Lesson.updateOne({_id: args.lesson}, {$pull: {likedBy: {$in: args.user}}})
+                    await User.updateOne({_id: args.user}, {$pull: {likedLessons: {$in: args.lesson}}})
+                }
             }
         }
     }
