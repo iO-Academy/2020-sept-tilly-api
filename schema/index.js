@@ -113,31 +113,31 @@ const NotificationType = new GraphQLObjectType({
     name: 'Notification',
     fields: () => ({
         id: {
-            type: GraphQLID || null
+            type: GraphQLID
         },
         sender: {
-            type: UserType || null,
+            type: UserType,
             resolve(parent, args) {
-                return User.findById(parent.sender)
+                return User.findById(parent.senderId)
             }
         },
         recipient: {
-            type: UserType || null,
+            type: UserType,
             resolve(parent, args) {
-                return User.findById(parent.recipient)
+                return User.findById(parent.recipientId)
             }
         },
         type: {
-            type: GraphQLString || null
+            type: GraphQLString
         },
         lesson: {
-            type: LessonType || null,
+            type: LessonType,
             resolve(parent, args) {
-                return Lesson.findById(parent.lesson)
+                return Lesson.findById(parent.lessonId)
             }
         },
         status: {
-            type: GraphQLString || null
+            type: GraphQLString
         }
     })
 });
