@@ -464,7 +464,7 @@ const Mutation = new GraphQLObjectType({
                     type: GraphQLString
                 },
                 lesson: {
-                    type: GraphQLID
+                    type: GraphQLID || null
                 },
                 token: {
                     type: GraphQLString
@@ -478,7 +478,7 @@ const Mutation = new GraphQLObjectType({
                     senderId: sender._id,
                     recipientId: recipient._id,
                     type: args.type,
-                    lessonId: lesson._id,
+                    lessonId: lesson ? lesson._id : null,
                     status: "unread"
                 });
                 let tokenResponse = await authenticate.authenticateToken(args.token)
