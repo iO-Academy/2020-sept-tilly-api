@@ -2,10 +2,10 @@ const mongo = require('mongoose');
 const Schema = mongo.Schema;
 
 const notificationSchema = new Schema({
-    recipientId: Object,
-    senderId: Object,
+    recipientId: mongo.Types.ObjectId,
+    senderId: mongo.Types.ObjectId,
     type: String,
-    lessonId: Object,
+    lessonId: mongo.Types.ObjectId,
     status: String
 });
 
