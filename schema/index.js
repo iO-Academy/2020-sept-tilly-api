@@ -162,7 +162,7 @@ const RootQuery = new GraphQLObjectType({
                 }
             },
             resolve(parent, args) {
-                return User.findOne({username: args.username})
+                return User.findOne({username: new RegExp(args.username, 'i')})
             }
         },
         search: {
@@ -174,10 +174,10 @@ const RootQuery = new GraphQLObjectType({
             },
             resolve(parent, args) {
                 return User.find({$or: [
-                        {username : new RegExp(args.searchTerm)},
-                        {name : new RegExp(args.searchTerm)},
-                        {email : new RegExp(args.searchTerm)},
-                        {description : new RegExp(args.searchTerm)}
+                        {username : new RegExp(args.searchTerm, 'i')},
+                        {name : new RegExp(args.searchTerm, 'i')},
+                        {email : new RegExp(args.searchTerm, 'i')},
+                        {description : new RegExp(args.searchTerm, 'i')}
                     ]})
             }
         },
@@ -189,7 +189,7 @@ const RootQuery = new GraphQLObjectType({
                 }
             },
             async resolve(parent, args) {
-                return await User.findOne({username: args.username}) === null;
+                return await User.findOne({username: new RegExp(args.username, 'i')}) === null;
             }
         },
         availableEmail: {
@@ -200,10 +200,7 @@ const RootQuery = new GraphQLObjectType({
                 }
             },
             async resolve(parent, args) {
-                if (await User.findOne({email: args.email}) !== null ){
-                    return false;
-                }
-                return true;
+                return await User.findOne({email: new RegExp(args.email, 'i')}) !== null;
             }
         },
         users: {
@@ -246,7 +243,7 @@ const Mutation = new GraphQLObjectType({
                 }
             },
             async resolve(parent, args) {
-                let user = await User.findOne({username: args.username})
+                let user = await User.findOne({username: new RegExp(args.username, 'i')})
                 let result = await bcrypt.compare(args.password, user.hash)
                 if (result) {
                     return authenticate.generateToken({id: user.id, username: args.username});
