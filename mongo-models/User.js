@@ -9,7 +9,9 @@ const userSchema = new Schema({
     description: String,
     following: Array,
     followers: Array,
-    lessons: Array
+    lessons: Array,
+    likedLessons: Array,
+    notifications: Array
 });
 
 module.exports = mongo.model('User', userSchema);
