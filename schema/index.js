@@ -111,31 +111,31 @@ const NotificationType = new GraphQLObjectType({
     name: 'Notification',
     fields: () => ({
         id: {
-            type: GraphQLID
+            type: GraphQLID || null
         },
         sender: {
-            type: UserType,
+            type: UserType || null,
             resolve(parent, args) {
                 return User.findById(parent.sender)
             }
         },
         recipient: {
-            type: UserType,
+            type: UserType || null,
             resolve(parent, args) {
                 return User.findById(parent.recipient)
             }
         },
         type: {
-            type: GraphQLString
+            type: GraphQLString || null
         },
         lesson: {
-            type: LessonType,
+            type: LessonType || null,
             resolve(parent, args) {
                 return Lesson.findById(parent.lesson)
             }
         },
         status: {
-            type: GraphQLString
+            type: GraphQLString || null
         }
     })
 });
@@ -394,7 +394,9 @@ const Mutation = new GraphQLObjectType({
                     await Lesson.updateOne({_id: args.lesson}, {$push: {likedBy: user._id}})
                     user.likedLessons.indexOf(args.lesson) === -1 &&
                     await User.updateOne({_id: args.user}, {$push: {likedLessons: lesson._id}})
+                    return true
                 }
+                return false
             }
         },
         unlike: {
@@ -417,7 +419,9 @@ const Mutation = new GraphQLObjectType({
                     let user = await User.findById(args.user)
                     await Lesson.updateOne({_id: args.lesson}, {$pull: {likedBy: user._id}})
                     await User.updateOne({_id: args.user}, {$pull: {likedLessons: lesson._id}})
+                    return true
                 }
+                return false
             }
         },
         deleteLesson: {
@@ -440,7 +444,9 @@ const Mutation = new GraphQLObjectType({
                     await Lesson.deleteOne({_id: args.lesson})
                     await User.updateOne({_id: args.user}, {$pull: {lessons: lesson._id}})
                     await User.updateMany({}, {$pull: {likedLessons: lesson._id}})
+                    return true
                 }
+                return false
             }
         },
         addNotification: {
@@ -477,9 +483,33 @@ const Mutation = new GraphQLObjectType({
                 if (tokenResponse && tokenResponse.id === args.sender) {
                     await User.updateOne({_id: args.recipient}, {$push: {notifications: notification._id}})
                     await notification.save();
+                    return true
                 }
+                return false
             }
         },
+        markAsRead: {
+            type: GraphQLBoolean,
+            args: {
+                user: {
+                    type: GraphQLID
+                },
+                notification: {
+                    type: GraphQLID
+                },
+                token: {
+                    type: GraphQLString
+                }
+            },
+            async resolve(parent, args) {
+                let tokenResponse = await authenticate.authenticateToken(args.token)
+                if (tokenResponse && tokenResponse.id === args.user) {
+                    await Notification.updateOne({_id: args.notification}, {$set: {status: "read"}})
+                    return true
+                }
+                return false
+            }
+        }
     }
 })
 

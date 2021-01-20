@@ -9,7 +9,10 @@ function generateAccessToken(payload) {
 
 function authenticateToken(token) {
     return jwt.verify(token, 'secret', (err, user) => {
-        err && console.log(err)
+        if (err) {
+            console.log(err)
+            return err
+        }
         return user
     })
 }
