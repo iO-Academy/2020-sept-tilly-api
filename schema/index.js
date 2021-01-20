@@ -4,6 +4,8 @@ const Lesson = require('../mongo-models/Lesson');
 const Notification = require('../mongo-models/Notification');
 const authenticate = require('../authentication');
 const bcrypt = require('bcrypt');
+const mongo = require("mongoose")
+const {ObjectId} = require("bson");
 
 const {
     GraphQLObjectType,
@@ -505,6 +507,25 @@ const Mutation = new GraphQLObjectType({
                 let tokenResponse = await authenticate.authenticateToken(args.token)
                 if (tokenResponse && tokenResponse.id === args.user) {
                     await Notification.updateOne({_id: args.notification}, {$set: {status: "read"}})
+                    return true
+                }
+                return false
+            }
+        },
+        markAllAsRead: {
+            type: GraphQLBoolean,
+            args: {
+                user: {
+                    type: GraphQLID
+                },
+                token: {
+                    type: GraphQLString
+                }
+            },
+            async resolve(parent, args) {
+                let tokenResponse = await authenticate.authenticateToken(args.token)
+                if (tokenResponse && tokenResponse.id === args.user) {
+                    await Notification.updateMany({recipientId: args.user}, {$set: {status: "read"}})
                     return true
                 }
                 return false
