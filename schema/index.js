@@ -164,7 +164,7 @@ const RootQuery = new GraphQLObjectType({
                 }
             },
             resolve(parent, args) {
-                return User.findOne({username: new RegExp(args.username, 'i')})
+                return User.findOne({username: new RegExp('^' + args.username + '$', 'i')})
             }
         },
         search: {
@@ -191,7 +191,7 @@ const RootQuery = new GraphQLObjectType({
                 }
             },
             async resolve(parent, args) {
-                return await User.findOne({username: new RegExp(args.username, 'i')}) === null;
+                return await User.findOne({username: new RegExp('^' + args.username + '$', 'i')}) === null;
             }
         },
         availableEmail: {
@@ -202,7 +202,7 @@ const RootQuery = new GraphQLObjectType({
                 }
             },
             async resolve(parent, args) {
-                return await User.findOne({email: new RegExp(args.email, 'i')}) !== null;
+                return await User.findOne({email: new RegExp('^' + args.email + '$', 'i')}) !== null;
             }
         },
         users: {
@@ -245,7 +245,7 @@ const Mutation = new GraphQLObjectType({
                 }
             },
             async resolve(parent, args) {
-                let user = await User.findOne({username: new RegExp(args.username, 'i')})
+                let user = await User.findOne({username: new RegExp('^' + args.username + '$', 'i')})
                 let result = await bcrypt.compare(args.password, user.hash)
                 if (result) {
                     return authenticate.generateToken({id: user.id, username: args.username});
