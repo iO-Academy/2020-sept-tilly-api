@@ -6,7 +6,7 @@ const notificationSchema = new Schema({
     senderId: mongo.Types.ObjectId,
     type: String,
     lessonId: mongo.Types.ObjectId,
-    status: String
+    viewed: Boolean
 });
 
 module.exports = mongo.model('Notification', notificationSchema);
