@@ -202,7 +202,7 @@ const RootQuery = new GraphQLObjectType({
                 }
             },
             async resolve(parent, args) {
-                return await User.findOne({email: new RegExp('^' + args.email + '$', 'i')}) !== null;
+                return await User.findOne({email: new RegExp('^' + args.email + '$', 'i')}) === null;
             }
         },
         users: {
