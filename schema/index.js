@@ -136,8 +136,8 @@ const NotificationType = new GraphQLObjectType({
                 return Lesson.findById(parent.lessonId)
             }
         },
-        status: {
-            type: GraphQLString
+        viewed: {
+            type: GraphQLBoolean
         }
     })
 });
@@ -479,7 +479,7 @@ const Mutation = new GraphQLObjectType({
                     recipientId: recipient._id,
                     type: args.type,
                     lessonId: lesson ? lesson._id : null,
-                    status: "unread"
+                    viewed: false
                 });
                 let tokenResponse = await authenticate.authenticateToken(args.token)
                 if (tokenResponse && tokenResponse.id === args.sender) {
@@ -506,7 +506,7 @@ const Mutation = new GraphQLObjectType({
             async resolve(parent, args) {
                 let tokenResponse = await authenticate.authenticateToken(args.token)
                 if (tokenResponse && tokenResponse.id === args.user) {
-                    await Notification.updateOne({_id: args.notification}, {$set: {status: "read"}})
+                    await Notification.updateOne({_id: args.notification}, {$set: {viewed: true}})
                     return true
                 }
                 return false
@@ -525,7 +525,7 @@ const Mutation = new GraphQLObjectType({
             async resolve(parent, args) {
                 let tokenResponse = await authenticate.authenticateToken(args.token)
                 if (tokenResponse && tokenResponse.id === args.user) {
-                    await Notification.updateMany({recipientId: args.user}, {$set: {status: "read"}})
+                    await Notification.updateMany({recipientId: args.user}, {$set: {viewed: true}})
                     return true
                 }
                 return false
