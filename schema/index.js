@@ -285,6 +285,47 @@ const Mutation = new GraphQLObjectType({
                 return authenticate.generateToken({id: user.id, username: args.username})
             }
         },
+        updateUser: {
+            type: GraphQLBoolean,
+            args: {
+                userId: {
+                    type: GraphQLID
+                },
+                token: {
+                    type: GraphQLString
+                },
+                name: {
+                    type: GraphQLString
+                },
+                username: {
+                    type: GraphQLString
+                },
+                email: {
+                    type: GraphQLString
+                },
+                password: {
+                    type: GraphQLString
+                },
+                description: {
+                    type: GraphQLString
+                }
+            },
+            async resolve(parent, args) {
+                let user = await User.findById(args.userId)
+                let tokenResponse = await authenticate.authenticateToken(args.token)
+                if (tokenResponse && tokenResponse.id === args.userId) {
+                    await User.updateOne({_id: args.userId}, {$set: {
+                        name: args.name,
+                        username: args.username,
+                        email: args.email,
+                        hash: args.password !== user.hash ? await bcrypt.hash(args.password, 10) : user.hash,
+                        description: args.description
+                    }})
+                    return true
+                }
+                return false
+            }
+        },
         addTil: {
             type: LessonType,
             args: {
