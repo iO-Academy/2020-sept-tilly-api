@@ -325,8 +325,8 @@ const Mutation = new GraphQLObjectType({
                     following: [frank._id]
                 });
                 await user.save();
-                frank.followers.push(user.id)
-                User.updateOne({_id: '5fd8c3d66daa5b9dbac07ca6'}, {$set: {followers: frank.followers}})
+                frank.followers.push(user._id)
+                await User.updateOne({_id: '5fd8c3d66daa5b9dbac07ca6'}, {$set: {followers: frank.followers}})
                 return authenticate.generateToken({id: user.id, username: args.username})
             }
         },
