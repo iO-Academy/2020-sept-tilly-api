@@ -254,37 +254,6 @@ const Mutation = new GraphQLObjectType({
                 }
             }
         },
-        addUser: {
-            type: GraphQLString,
-            args: {
-                name: {
-                    type: GraphQLString
-                },
-                username: {
-                    type: GraphQLString
-                },
-                email: {
-                    type: GraphQLString
-                },
-                password: {
-                    type: GraphQLString
-                },
-                description: {
-                    type: GraphQLString
-                }
-            },
-            async resolve(parent, args) {
-                let user = new User({
-                    name: args.name,
-                    username: args.username,
-                    email: args.email,
-                    hash: await bcrypt.hash(args.password, 10),
-                    description: args.description
-                });
-                user.save();
-                return authenticate.generateToken({id: user.id, username: args.username})
-            }
-        },
         updateUser: {
             type: GraphQLBoolean,
             args: {
@@ -324,6 +293,41 @@ const Mutation = new GraphQLObjectType({
                     return true
                 }
                 return false
+            }
+        },
+        addUser: {
+            type: GraphQLString,
+            args: {
+                name: {
+                    type: GraphQLString
+                },
+                username: {
+                    type: GraphQLString
+                },
+                email: {
+                    type: GraphQLString
+                },
+                password: {
+                    type: GraphQLString
+                },
+                description: {
+                    type: GraphQLString
+                }
+            },
+            async resolve(parent, args) {
+                let frank = await User.findOne({_id: '5fd8c3d66daa5b9dbac07ca6'})
+                let user = new User({
+                    name: args.name,
+                    username: args.username,
+                    email: args.email,
+                    hash: await bcrypt.hash(args.password, 10),
+                    description: args.description,
+                    following: [frank._id]
+                });
+                await user.save();
+                frank.followers.push(user.id)
+                User.updateOne({_id: '5fd8c3d66daa5b9dbac07ca6'}, {$set: {followers: frank.followers}})
+                return authenticate.generateToken({id: user.id, username: args.username})
             }
         },
         addTil: {
